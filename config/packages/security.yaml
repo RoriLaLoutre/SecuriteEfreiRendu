@@ -11,7 +11,6 @@ security:
                 property: email          # on utilise l'email comme identifiant
 
     firewalls:
-
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
@@ -19,27 +18,22 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            anonymous: true
-
             form_login:
-                login_path: app_login
-                check_path: app_login
+                login_path: app_login       # route de ton controller
+                check_path: app_login       # Symfony gère la soumission du formulaire
                 enable_csrf: true
-
                 username_parameter: email
                 password_parameter: password
-
                 default_target_path: app_user_index
-
             logout:
                 path: app_logout
                 target: app_login
 
+    # access_control:   je ne comprend pas pourquoi cela ne marche pas , je me retoruve avec une boucle infinie de redirection
+    #     - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    #     - { path: ^/user/new, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+    #     - { path: ^/, roles: ROLE_USER }
 
-    access_control:
-        - { path: ^/user/new, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/, roles: ROLE_USER }
 
 when@test:
     security:

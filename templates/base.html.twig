@@ -15,13 +15,18 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
+
     <body>
+    {% set theme = app.request.cookies.get('theme_mode', 'light') %}
+
     <div class="container">
         {% if app.user %}
             <p>Connecté en tant que <strong>{{ app.user.email }}</strong></p>
         {% else %}
             <p>Pas connecté</p>
         {% endif %}
+        <a href="{{ path('app_theme_switch', {'mode': 'light'}) }}">☀️ Clair</a>
+        <a href="{{ path('app_theme_switch', {'mode': 'dark'}) }}">🌙 Sombre</a>
         {% block body %}{% endblock %}
     </div>
     </body>
