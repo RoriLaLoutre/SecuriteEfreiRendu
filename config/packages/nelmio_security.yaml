@@ -1,0 +1,7 @@
+# config/packages/nelmio_security.yaml
+nelmio_security:
+    csp:
+        enabled: true
+        enforce:
+            default-src: ['self']
+            script-src: ['self', 'https://trusted.cdn.com'] #ca marche super mais du coup le css de pico est mort ;_;

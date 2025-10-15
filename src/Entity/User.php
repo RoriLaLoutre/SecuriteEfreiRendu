@@ -27,12 +27,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Le mot de passe est obligatoire.")]
+    private ?string $password = null;
+
+    #[Assert\NotBlank(message: "Le mot de passe est obligatoire.", groups: ["registration"])]
     #[Assert\Length(
         min: 5,
-        minMessage: "le mot de passe doit faire au moins 5 charactères",
+        minMessage: "Le mot de passe doit faire au moins 5 caractères",
+        groups: ["registration"]
     )]
-    private ?string $password = null;
+    private ?string $plainPassword = null;
+
 
     #[ORM\Column]
     private array $roles = [];
@@ -121,9 +125,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): static
+    {
+        $this->plainPassword = $plainPassword;
+        return $this;
+    }
+
     public function getRoles(): array
     {
-        return $this->roles;
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
     }
 
     public function setRoles(array $roles): static

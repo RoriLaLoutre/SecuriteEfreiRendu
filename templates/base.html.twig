@@ -17,6 +17,11 @@
     </head>
     <body>
     <div class="container">
+        {% if app.user %}
+            <p>Connecté en tant que <strong>{{ app.user.email }}</strong></p>
+        {% else %}
+            <p>Pas connecté</p>
+        {% endif %}
         {% block body %}{% endblock %}
     </div>
     </body>
