@@ -6,9 +6,12 @@ use App\Repository\BookRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+
 class Book
 {
     #[ORM\Id]
@@ -17,15 +20,39 @@ class Book
     private ?int $id = null;
 
     #[ORM\Column(length: 13)]
+    // #[Assert\Isbn(
+    //     message: "l'isbn doit être valide" je voulais mettre ca mais j'arrive meme pas a en trouver un valide
+    // )]
+    #[Assert\NotBlank(message: "L'isbn est obligatoire.")]
+
     private ?string $isbn = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\Type(
+        type: "string",
+        message: "le titre doit etre une chaine de caractères"
+    )]
+    #[Assert\NotBlank(message: "Le titre est obligatoire.")]
+
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: "Le résumé est obligatoire.")]
+    #[Assert\Type(
+        type: "string",
+        message: "le résumé doit etre une chaine de caractères"
+    )]
+
     private ?string $summary = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: "L'année de publication est obligatoire.")]
+    #[Assert\Range(
+        min: -5000,
+        max: 2025,
+        notInRangeMessage: 'Si le livre n"a pas été écrit entre {{ min }} et {{ max }} vous etes un menteur, et moi j"aime pas les menteurs'
+    )]
+
     private ?int $publicationYear = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
@@ -53,6 +80,19 @@ class Book
     {
         $this->genres = new ArrayCollection();
         $this->authors = new ArrayCollection();
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
+
+    #[ORM\PreUpdate()]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updatedAt = new \DateTime();
     }
 
     public function getId(): ?int

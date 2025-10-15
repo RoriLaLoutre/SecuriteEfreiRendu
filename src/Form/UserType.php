@@ -6,6 +6,8 @@ use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+
 
 class UserType extends AbstractType
 {
@@ -14,14 +16,13 @@ class UserType extends AbstractType
         $builder
             ->add('email')
             ->add('password')
-            ->add('roles')
             ->add('lastName')
             ->add('firstName')
             ->add('address')
             ->add('zipCode')
-            ->add('birthDate')
-            ->add('createdAt')
-            ->add('updatedAt')
+            ->add('birthDate', DateType::class, [
+                'format' => 'yyyy-MM-dd',
+            ])
         ;
     }
 

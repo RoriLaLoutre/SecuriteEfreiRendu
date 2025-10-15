@@ -3,13 +3,18 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+#[ORM\HasLifecycleCallbacks]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -17,27 +22,47 @@ class User
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: "L'email est obligatoire.")]
+    #[Assert\Email(message:"L'email doit être au format *****@****.*** ex: johnsmith@mail.com")]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le mot de passe est obligatoire.")]
+    #[Assert\Length(
+        min: 5,
+        minMessage: "le mot de passe doit faire au moins 5 charactères",
+    )]
     private ?string $password = null;
 
     #[ORM\Column]
     private array $roles = [];
 
     #[ORM\Column(length: 50)]
+    #[Assert\Type(
+        type: "string",
+        message: "le nom ne doit contenir quer des lettres"
+    )]
+
     private ?string $lastName = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\Type(
+        type: "string",
+        message: "le prénom ne doit contenir que des lettres"
+    )]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 150)]
+    #[Assert\NotBlank(message: "L'adresse est obligatoire.")]
     private ?string $address = null;
 
     #[ORM\Column(length: 5)]
+    #[Assert\NotBlank(message: "Le zipCode est obligatoire.")]
+
     private ?string $zipCode = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotBlank(message: "La date de naissance est obligatoire.")]
     private ?\DateTimeInterface $birthDate = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -52,6 +77,19 @@ class User
     public function __construct()
     {
         $this->books = new ArrayCollection();
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
+
+    #[ORM\PreUpdate()]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updatedAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -150,7 +188,7 @@ class User
 
     public function setBirthDate(\DateTimeInterface $birthDate): static
     {
-        $this->birthDate = $birthDate;
+        $this->birthDate = new DateTimeImmutable(); //$birthDate;
 
         return $this;
     }
@@ -207,5 +245,17 @@ class User
         }
 
         return $this;
+    }
+public function getUserIdentifier(): string
+    {
+        // Symfony utilise cette méthode comme identifiant unique de l'utilisateur
+        return (string) $this->email;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Si tu stockes des données sensibles temporairement (comme un mot de passe en clair), efface-les ici.
+        // Exemple :
+        // $this->plainPassword = null;
     }
 }
